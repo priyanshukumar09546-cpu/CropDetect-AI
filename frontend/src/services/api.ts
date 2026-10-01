@@ -1,4 +1,9 @@
 import { PredictionResponse, ModelInfo, DatasetMetadata, HealthStatus } from '../types';
+import {
+  isRunningInIframe,
+  requestStreamlitPrediction,
+  getCachedBridgeMetadata,
+} from './streamlitBridge';
 
 const API_BASE = '/api';
 
@@ -32,6 +37,19 @@ export async function predictCropDisease(file: File): Promise<PredictionResponse
     throw new ApiError('Image file is too small or corrupt. Minimum size is 1 KB.');
   }
 
+  // 1. If running inside Streamlit component iframe, communicate with Python backend via bridge
+  if (isRunningInIframe()) {
+    try {
+      const bridgeResult = await requestStreamlitPrediction(file);
+      if (bridgeResult) {
+        return bridgeResult;
+      }
+    } catch (stErr: any) {
+      console.warn('Streamlit bridge prediction failed, attempting HTTP fallback:', stErr);
+    }
+  }
+
+  // 2. Standalone / FastAPI / Local development fallback via HTTP
   const formData = new FormData();
   formData.append('image', file);
 
@@ -67,6 +85,9 @@ export async function predictCropDisease(file: File): Promise<PredictionResponse
 }
 
 export async function getModelInfo(): Promise<ModelInfo | null> {
+  const cached = getCachedBridgeMetadata().modelInfo;
+  if (cached) return cached;
+
   try {
     const response = await fetch(`${API_BASE}/model-info`);
     if (!response.ok) {
@@ -80,6 +101,9 @@ export async function getModelInfo(): Promise<ModelInfo | null> {
 }
 
 export async function getDatasetInfo(): Promise<DatasetMetadata | null> {
+  const cached = getCachedBridgeMetadata().datasetInfo;
+  if (cached) return cached;
+
   try {
     const response = await fetch(`${API_BASE}/dataset-info`);
     if (!response.ok) {
@@ -93,6 +117,9 @@ export async function getDatasetInfo(): Promise<DatasetMetadata | null> {
 }
 
 export async function getHealth(): Promise<HealthStatus | null> {
+  const cached = getCachedBridgeMetadata().healthStatus;
+  if (cached) return cached;
+
   try {
     const response = await fetch(`${API_BASE}/health`);
     if (!response.ok) {

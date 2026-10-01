@@ -8,6 +8,7 @@ import { ModelPage } from './pages/ModelPage';
 import { AboutPage } from './pages/AboutPage';
 import { DatasetMetadata, ModelInfo, HealthStatus } from './types';
 import { getDatasetInfo, getModelInfo, getHealth } from './services/api';
+import { initStreamlitBridge, sendFrameHeight } from './services/streamlitBridge';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('home');
@@ -22,6 +23,7 @@ export const App: React.FC = () => {
       const hash = window.location.hash.replace('#/', '').replace('#', '');
       if (['home', 'detect', 'dataset', 'model', 'about'].includes(hash)) {
         setActiveTab(hash);
+        setTimeout(sendFrameHeight, 150);
       }
     };
 
@@ -33,7 +35,17 @@ export const App: React.FC = () => {
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
     window.location.hash = `#/${tab}`;
+    setTimeout(sendFrameHeight, 150);
   };
+
+  // Initialize Streamlit Bridge if running in component iframe
+  useEffect(() => {
+    initStreamlitBridge(
+      (mdl) => setModelInfo(mdl),
+      (ds) => setDatasetInfo(ds),
+      (hlth) => setHealthStatus(hlth)
+    );
+  }, []);
 
   // Fetch real dataset and model info once on mount
   useEffect(() => {
