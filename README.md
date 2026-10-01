@@ -26,6 +26,38 @@ The system features:
 
 ---
 
+## 📸 Project Screenshots
+
+### 🌿 Real-Time CNN Diagnostic Portal
+![CropDetect AI - Real-Time Leaf Disease Diagnostic Portal](screenshots/project-screenshot.png)
+*Automated crop leaf disease detection interface featuring drag-and-drop image uploads, out-of-distribution biometric validation, and real-time inference.*
+
+---
+
+### 🚀 Landing Page & Interactive CNN Scanner
+![CropDetect AI - Homepage and Hero Scanner](screenshots/cropdetect-home.png)
+*Production web dashboard with responsive navigation, dynamic leaf scanner visualizer, and core benchmark metrics.*
+
+---
+
+### ☁️ Streamlit Community Cloud Application
+![CropDetect AI - Streamlit Community Cloud Interface](screenshots/cropdetect-streamlit.png)
+*Standalone Streamlit web application (`app.py`) optimized for single-click cloud deployment with custom agricultural green theme.*
+
+---
+
+### 📊 PlantVillage Dataset Explorer
+![CropDetect AI - PlantVillage Dataset Overview](screenshots/cropdetect-dataset.png)
+*Interactive dataset breakdown showcasing the 54,307 laboratory-verified images, 38 crop disease classes, and stratified 70/15/15 train-val-test split.*
+
+---
+
+### 🧠 Model Architecture & Empirical Metrics
+![CropDetect AI - Deep Learning Model Specification](screenshots/cropdetect-model.png)
+*Model performance evaluation metrics (95.5% accuracy, 95.2% F1-score) along with empirical convergence curves across 25 training epochs.*
+
+---
+
 ## ✨ Key Features
 
 1. **Leaf Image Diagnostic Portal**:
