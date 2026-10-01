@@ -55,11 +55,15 @@ class PlantLeafValidator:
                 weights='imagenet',
                 include_top=True
             )
-            # Load ImageNet class index
-            class_idx_path = tf.keras.utils.get_file(
-                'imagenet_class_index.json',
-                'https://storage.googleapis.com/download.tensorflow.org/data/imagenet_class_index.json'
-            )
+            # Load ImageNet class index (prefer bundled local copy to avoid network timeouts on cloud)
+            local_idx_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', 'imagenet_class_index.json')
+            if os.path.exists(local_idx_path):
+                class_idx_path = local_idx_path
+            else:
+                class_idx_path = tf.keras.utils.get_file(
+                    'imagenet_class_index.json',
+                    'https://storage.googleapis.com/download.tensorflow.org/data/imagenet_class_index.json'
+                )
             with open(class_idx_path, 'r', encoding='utf-8') as f:
                 self.imagenet_classes = json.load(f)
 
