@@ -23,8 +23,6 @@ FRONTEND_DIST = ROOT_DIR / "frontend" / "dist"
 
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
-if str(BACKEND_DIR) not in sys.path:
-    sys.path.insert(0, str(BACKEND_DIR))
 
 # Streamlit Page Config
 st.set_page_config(
@@ -70,10 +68,7 @@ st.markdown(
 # Initialize Prediction Service (PyTorch MobileNetV2 + Out-of-Distribution Validator)
 @st.cache_resource
 def get_prediction_service():
-    try:
-        from backend.services.prediction_service import PredictionService
-    except ImportError:
-        from services.prediction_service import PredictionService
+    from backend.services.prediction_service import PredictionService
     return PredictionService.get_instance()
 
 # Load real Dataset & Model metadata

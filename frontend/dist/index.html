@@ -10,8 +10,16 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <script type="module" crossorigin src="/assets/index-CHFNnmdk.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-DVsrdhZl.css">
+    <script>
+      // Immediate handshake to Streamlit parent iframe to prevent component loading timeout
+      try {
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage({ isStreamlitMessage: true, type: 'streamlit:componentReady', apiVersion: 1 }, '*');
+        }
+      } catch (e) {}
+    </script>
+    <script type="module" crossorigin src="./assets/index-CHFNnmdk.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-DVsrdhZl.css">
   </head>
   <body class="bg-white text-[#17201A] font-sans antialiased selection:bg-[#DCFCE7] selection:text-[#166534]">
     <div id="root"></div>
