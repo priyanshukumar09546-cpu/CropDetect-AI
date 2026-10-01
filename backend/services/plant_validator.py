@@ -19,6 +19,8 @@ class PlantLeafValidator:
 
     def __init__(self):
         self.mobilenet_model = None
+        self.torch_mobilenet = None
+        self.torch_transforms = None
         self.imagenet_classes = {}
         self.botanical_indices = set()
         self.non_plant_indices = set()
@@ -47,27 +49,15 @@ class PlantLeafValidator:
         except Exception as e:
             logger.warning(f"Error loading OpenCV cascades: {e}")
 
-        # 2. Pretrained MobileNetV2 (ImageNet)
+        # 2. ImageNet Class Mapping
         try:
-            import tensorflow as tf
-            logger.info("Initializing pretrained MobileNetV2 for out-of-distribution leaf validation...")
-            self.mobilenet_model = tf.keras.applications.MobileNetV2(
-                weights='imagenet',
-                include_top=True
-            )
-            # Load ImageNet class index (prefer bundled local copy to avoid network timeouts on cloud)
             local_idx_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', 'imagenet_class_index.json')
             if os.path.exists(local_idx_path):
-                class_idx_path = local_idx_path
+                with open(local_idx_path, 'r', encoding='utf-8') as f:
+                    self.imagenet_classes = json.load(f)
             else:
-                class_idx_path = tf.keras.utils.get_file(
-                    'imagenet_class_index.json',
-                    'https://storage.googleapis.com/download.tensorflow.org/data/imagenet_class_index.json'
-                )
-            with open(class_idx_path, 'r', encoding='utf-8') as f:
-                self.imagenet_classes = json.load(f)
+                self.imagenet_classes = {}
 
-            # Categorize the 1,000 ImageNet synset indices
             botanical_keywords = {
                 'daisy', 'sunflower', 'lady\'s_slipper', 'pot', 'potter\'s_wheel', 'artichoke',
                 'cardoon', 'mushroom', 'agaric', 'gyromitra', 'stinkhorn', 'earthstar', 'puffball',
@@ -98,11 +88,37 @@ class PlantLeafValidator:
                     self.non_plant_indices.add(idx)
 
             logger.info(
-                f"MobileNetV2 ready: mapped {len(self.botanical_indices)} botanical classes "
-                f"and {len(self.non_plant_indices)} distinct non-plant classes."
+                f"ImageNet mapping loaded: {len(self.botanical_indices)} botanical, "
+                f"{len(self.non_plant_indices)} non-plant categories."
             )
-        except Exception as e:
-            logger.warning(f"Error loading MobileNetV2 validator: {e}")
+        except Exception as e_map:
+            logger.warning(f"Error loading ImageNet class mapping: {e_map}")
+
+        # 3. Pretrained MobileNetV2 (prefer PyTorch/Torchvision, fallback to TensorFlow)
+        try:
+            import torchvision.models as tv_models
+            import torchvision.transforms as tv_transforms
+            logger.info("Initializing PyTorch torchvision MobileNetV2 for out-of-distribution leaf validation...")
+            self.torch_mobilenet = tv_models.mobilenet_v2(weights=tv_models.MobileNet_V2_Weights.DEFAULT)
+            self.torch_mobilenet.eval()
+            self.torch_transforms = tv_transforms.Compose([
+                tv_transforms.Resize((224, 224)),
+                tv_transforms.ToTensor(),
+                tv_transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+            ])
+            logger.info("Torchvision MobileNetV2 initialized successfully.")
+        except Exception as e_torch:
+            logger.info(f"Torchvision MobileNetV2 not initialized: {e_torch}")
+            try:
+                import tensorflow as tf
+                logger.info("Falling back to TensorFlow MobileNetV2...")
+                self.mobilenet_model = tf.keras.applications.MobileNetV2(
+                    weights='imagenet',
+                    include_top=True
+                )
+                logger.info("TensorFlow MobileNetV2 loaded.")
+            except Exception as e_tf:
+                logger.info("MobileNetV2 classifier optional; relying on OpenCV & color signatures.")
 
     def validate_image_quality(self, pil_image: Image.Image) -> Tuple[bool, str, str]:
         """
@@ -264,48 +280,58 @@ class PlantLeafValidator:
         non_plant_score = 0.0
         botanical_score = 0.0
 
-        if self.mobilenet_model is not None:
+        preds = None
+        if self.torch_mobilenet is not None and self.torch_transforms is not None:
+            try:
+                import torch
+                img_t = self.torch_transforms(pil_image.convert("RGB")).unsqueeze(0)
+                with torch.no_grad():
+                    logits = self.torch_mobilenet(img_t)
+                    probs = torch.softmax(logits, dim=1)[0].numpy()
+                preds = probs
+            except Exception as ex:
+                logger.warning(f"Error during PyTorch MobileNet inference: {ex}")
+        elif self.mobilenet_model is not None:
             try:
                 from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
                 resized = pil_image.resize((224, 224), Image.Resampling.BILINEAR)
                 arr = preprocess_input(np.expand_dims(np.array(resized, dtype=np.float32), axis=0))
                 preds = self.mobilenet_model.predict(arr, verbose=0)[0]
-
-                # Top 10 predictions
-                top_10 = np.argsort(preds)[::-1][:10]
-                non_plant_score = sum(float(preds[idx]) for idx in top_10 if idx in self.non_plant_indices)
-                botanical_score = sum(float(preds[idx]) for idx in top_10 if idx in self.botanical_indices)
-
-                top_1_idx = top_10[0]
-                top_1_name = self.imagenet_classes.get(str(top_1_idx), ["", "unknown"])[1]
-                top_1_prob = float(preds[top_1_idx])
-
-                logger.info(
-                    f"MobileNet top-1: {top_1_name} ({top_1_prob:.2f}), "
-                    f"non_plant_score={non_plant_score:.2f}, botanical={botanical_score:.2f}, green_ratio={green_ratio:.2f}"
-                )
-
-                # If top-1 is an explicit non-plant object (e.g. car, dog, suit, laptop, building) with high confidence
-                if top_1_idx in self.non_plant_indices and top_1_prob > 0.20 and green_ratio < 0.06:
-                    clean_name = top_1_name.replace("_", " ")
-                    return {
-                        "is_plant_leaf": False,
-                        "validation_confidence": round(min(0.99, non_plant_score + 0.3), 2),
-                        "error_type": "INVALID_IMAGE",
-                        "message": f"This image appears to contain an unrelated subject ({clean_name}). Please upload a clear photograph of a crop or plant leaf."
-                    }
-
-                # If non-plant score dominates and foliage is negligible
-                if non_plant_score > 0.35 and green_ratio < 0.05:
-                    return {
-                        "is_plant_leaf": False,
-                        "validation_confidence": round(min(0.98, non_plant_score), 2),
-                        "error_type": "INVALID_IMAGE",
-                        "message": "This image does not appear to contain a crop or plant leaf. Please upload a clear photograph of a plant leaf."
-                    }
-
             except Exception as ex:
-                logger.warning(f"Error during MobileNetV2 validation inference: {ex}")
+                logger.warning(f"Error during TensorFlow MobileNet inference: {ex}")
+
+        if preds is not None:
+            top_10 = np.argsort(preds)[::-1][:10]
+            non_plant_score = sum(float(preds[idx]) for idx in top_10 if idx in self.non_plant_indices)
+            botanical_score = sum(float(preds[idx]) for idx in top_10 if idx in self.botanical_indices)
+
+            top_1_idx = top_10[0]
+            top_1_name = self.imagenet_classes.get(str(top_1_idx), ["", "unknown"])[1]
+            top_1_prob = float(preds[top_1_idx])
+
+            logger.info(
+                f"MobileNet top-1: {top_1_name} ({top_1_prob:.2f}), "
+                f"non_plant_score={non_plant_score:.2f}, botanical={botanical_score:.2f}, green_ratio={green_ratio:.2f}"
+            )
+
+            # If top-1 is an explicit non-plant object (e.g. car, dog, suit, laptop, building) with high confidence
+            if top_1_idx in self.non_plant_indices and top_1_prob > 0.20 and green_ratio < 0.06:
+                clean_name = top_1_name.replace("_", " ")
+                return {
+                    "is_plant_leaf": False,
+                    "validation_confidence": round(min(0.99, non_plant_score + 0.3), 2),
+                    "error_type": "INVALID_IMAGE",
+                    "message": f"This image appears to contain an unrelated subject ({clean_name}). Please upload a clear photograph of a crop or plant leaf."
+                }
+
+            # If non-plant score dominates and foliage is negligible
+            if non_plant_score > 0.35 and green_ratio < 0.05:
+                return {
+                    "is_plant_leaf": False,
+                    "validation_confidence": round(min(0.98, non_plant_score), 2),
+                    "error_type": "INVALID_IMAGE",
+                    "message": "This image does not appear to contain a crop or plant leaf. Please upload a clear photograph of a plant leaf."
+                }
 
         # If image has virtually zero green chlorophyll and was not recognized as botanical
         if not has_foliage and botanical_score < 0.20:
