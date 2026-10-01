@@ -1,0 +1,43 @@
+{
+  "architecture_name": "MobileNetV2 Deep Convolutional Neural Network (PlantVillage 38-Class)",
+  "input_shape": [224, 224, 3],
+  "num_classes": 38,
+  "framework": "PyTorch / Transformers",
+  "normalization": "(pixel / 127.5) - 1.0",
+  "optimizer": "Adam(learning_rate=0.0005)",
+  "loss": "categorical_crossentropy",
+  "batch_size": 32,
+  "epochs_trained": 25,
+  "prediction_threshold": 0.40,
+  "plant_validation_threshold": 0.70,
+  "out_of_distribution_validation": {
+    "enabled": true,
+    "quality_check": "Laplacian variance (blur), luminance & blank/uniform checks",
+    "biometric_filter": "OpenCV Haar cascade face & upperbody detector",
+    "foliage_signature": "HSV chlorophyll & necrotic chromaticity analysis",
+    "deep_classifier": "MobileNetV2 ImageNet Out-of-Distribution filter"
+  },
+  "uncertainty_handling": {
+    "enabled": true,
+    "description": "Rejects predictions where top probability is below prediction_threshold as LOW_CONFIDENCE"
+  },
+  "layers": [
+    {"type": "InputLayer", "shape": [224, 224, 3], "description": "Normalized RGB Crop Leaf Input"},
+    {"type": "Conv2D", "filters": 32, "kernel_size": [3, 3], "activation": "relu", "padding": "same"},
+    {"type": "BatchNormalization"},
+    {"type": "MaxPooling2D", "pool_size": [2, 2], "strides": [2, 2]},
+    {"type": "Conv2D", "filters": 64, "kernel_size": [3, 3], "activation": "relu", "padding": "same"},
+    {"type": "BatchNormalization"},
+    {"type": "MaxPooling2D", "pool_size": [2, 2], "strides": [2, 2]},
+    {"type": "Conv2D", "filters": 128, "kernel_size": [3, 3], "activation": "relu", "padding": "same"},
+    {"type": "BatchNormalization"},
+    {"type": "MaxPooling2D", "pool_size": [2, 2], "strides": [2, 2]},
+    {"type": "Conv2D", "filters": 128, "kernel_size": [3, 3], "activation": "relu", "padding": "same"},
+    {"type": "BatchNormalization"},
+    {"type": "MaxPooling2D", "pool_size": [2, 2], "strides": [2, 2]},
+    {"type": "Flatten"},
+    {"type": "Dense", "units": 512, "activation": "relu"},
+    {"type": "Dropout", "rate": 0.5},
+    {"type": "Dense", "units": 38, "activation": "softmax", "description": "Multi-class Probability Distribution"}
+  ]
+}

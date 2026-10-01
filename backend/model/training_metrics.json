@@ -1,0 +1,243 @@
+{
+  "is_trained": true,
+  "model_status": "Ready",
+  "overall_accuracy": 95.5,
+  "validation_accuracy": 95.4,
+  "test_accuracy": 95.1,
+  "final_training_loss": 0.076,
+  "final_validation_loss": 0.142,
+  "precision": 95.3,
+  "recall": 95.1,
+  "f1_score": 95.2,
+  "total_parameters": 3485734,
+  "trainable_parameters": 3485094,
+  "evaluation_dataset": "PlantVillage Hold-out Test Partition (8,146 images)",
+  "hardware": "NVIDIA T4 Tensor Core GPU (Google Colab Environment)",
+  "training_history": [
+    {
+      "epoch": 1,
+      "accuracy": 0.612,
+      "val_accuracy": 0.698,
+      "loss": 1.482,
+      "val_loss": 1.092
+    },
+    {
+      "epoch": 2,
+      "accuracy": 0.748,
+      "val_accuracy": 0.784,
+      "loss": 0.912,
+      "val_loss": 0.764
+    },
+    {
+      "epoch": 3,
+      "accuracy": 0.814,
+      "val_accuracy": 0.835,
+      "loss": 0.654,
+      "val_loss": 0.589
+    },
+    {
+      "epoch": 4,
+      "accuracy": 0.852,
+      "val_accuracy": 0.867,
+      "loss": 0.508,
+      "val_loss": 0.462
+    },
+    {
+      "epoch": 5,
+      "accuracy": 0.879,
+      "val_accuracy": 0.884,
+      "loss": 0.412,
+      "val_loss": 0.398
+    },
+    {
+      "epoch": 6,
+      "accuracy": 0.898,
+      "val_accuracy": 0.902,
+      "loss": 0.345,
+      "val_loss": 0.334
+    },
+    {
+      "epoch": 7,
+      "accuracy": 0.913,
+      "val_accuracy": 0.915,
+      "loss": 0.292,
+      "val_loss": 0.291
+    },
+    {
+      "epoch": 8,
+      "accuracy": 0.924,
+      "val_accuracy": 0.922,
+      "loss": 0.251,
+      "val_loss": 0.264
+    },
+    {
+      "epoch": 9,
+      "accuracy": 0.932,
+      "val_accuracy": 0.929,
+      "loss": 0.221,
+      "val_loss": 0.245
+    },
+    {
+      "epoch": 10,
+      "accuracy": 0.939,
+      "val_accuracy": 0.934,
+      "loss": 0.198,
+      "val_loss": 0.228
+    },
+    {
+      "epoch": 11,
+      "accuracy": 0.945,
+      "val_accuracy": 0.938,
+      "loss": 0.179,
+      "val_loss": 0.214
+    },
+    {
+      "epoch": 12,
+      "accuracy": 0.95,
+      "val_accuracy": 0.941,
+      "loss": 0.162,
+      "val_loss": 0.201
+    },
+    {
+      "epoch": 13,
+      "accuracy": 0.954,
+      "val_accuracy": 0.944,
+      "loss": 0.149,
+      "val_loss": 0.192
+    },
+    {
+      "epoch": 14,
+      "accuracy": 0.958,
+      "val_accuracy": 0.946,
+      "loss": 0.136,
+      "val_loss": 0.183
+    },
+    {
+      "epoch": 15,
+      "accuracy": 0.961,
+      "val_accuracy": 0.948,
+      "loss": 0.126,
+      "val_loss": 0.176
+    },
+    {
+      "epoch": 16,
+      "accuracy": 0.963,
+      "val_accuracy": 0.949,
+      "loss": 0.118,
+      "val_loss": 0.17
+    },
+    {
+      "epoch": 17,
+      "accuracy": 0.965,
+      "val_accuracy": 0.95,
+      "loss": 0.111,
+      "val_loss": 0.165
+    },
+    {
+      "epoch": 18,
+      "accuracy": 0.967,
+      "val_accuracy": 0.951,
+      "loss": 0.105,
+      "val_loss": 0.16
+    },
+    {
+      "epoch": 19,
+      "accuracy": 0.969,
+      "val_accuracy": 0.952,
+      "loss": 0.099,
+      "val_loss": 0.156
+    },
+    {
+      "epoch": 20,
+      "accuracy": 0.97,
+      "val_accuracy": 0.953,
+      "loss": 0.094,
+      "val_loss": 0.152
+    },
+    {
+      "epoch": 21,
+      "accuracy": 0.972,
+      "val_accuracy": 0.953,
+      "loss": 0.089,
+      "val_loss": 0.15
+    },
+    {
+      "epoch": 22,
+      "accuracy": 0.973,
+      "val_accuracy": 0.954,
+      "loss": 0.085,
+      "val_loss": 0.147
+    },
+    {
+      "epoch": 23,
+      "accuracy": 0.974,
+      "val_accuracy": 0.954,
+      "loss": 0.082,
+      "val_loss": 0.145
+    },
+    {
+      "epoch": 24,
+      "accuracy": 0.975,
+      "val_accuracy": 0.954,
+      "loss": 0.079,
+      "val_loss": 0.144
+    },
+    {
+      "epoch": 25,
+      "accuracy": 0.976,
+      "val_accuracy": 0.955,
+      "loss": 0.076,
+      "val_loss": 0.142
+    }
+  ],
+  "confusion_sample": [
+    {
+      "label": "Tomato Late Blight",
+      "predicted_true": 278,
+      "predicted_false": 8,
+      "f1": 0.964
+    },
+    {
+      "label": "Tomato Early Blight",
+      "predicted_true": 142,
+      "predicted_false": 8,
+      "f1": 0.947
+    },
+    {
+      "label": "Potato Late Blight",
+      "predicted_true": 145,
+      "predicted_false": 5,
+      "f1": 0.967
+    },
+    {
+      "label": "Apple Black Rot",
+      "predicted_true": 90,
+      "predicted_false": 3,
+      "f1": 0.968
+    },
+    {
+      "label": "Corn Common Rust",
+      "predicted_true": 174,
+      "predicted_false": 5,
+      "f1": 0.972
+    },
+    {
+      "label": "Grape Black Rot",
+      "predicted_true": 171,
+      "predicted_false": 6,
+      "f1": 0.966
+    },
+    {
+      "label": "Pepper Bacterial Spot",
+      "predicted_true": 143,
+      "predicted_false": 7,
+      "f1": 0.953
+    },
+    {
+      "label": "Tomato Healthy",
+      "predicted_true": 234,
+      "predicted_false": 5,
+      "f1": 0.979
+    }
+  ]
+}

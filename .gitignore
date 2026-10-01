@@ -1,0 +1,72 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+package-lock.json
+
+# Build outputs
+dist/
+build/
+*.egg-info/
+
+# Python cache & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg
+
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+secrets.toml
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+
+# IDE and OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+.gemini/
+
+# Large model artifacts exceeding GitHub 100MB limit
+*.keras
+*.h5
+backend/model/crop_disease_model.keras
+
+# Raw training datasets (keep sample_images/ for quick demo benchmarks)
+PlantVillage/
+plantvillage/
+PlantVillage-Dataset/
+datasets/
+data/raw/
+*.tar.gz
+*.zip
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
