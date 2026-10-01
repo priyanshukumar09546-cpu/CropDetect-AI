@@ -105,7 +105,7 @@ CropDetect-AI/
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/Priyanshu-143/CropDetect-AI.git
+git clone https://github.com/priyanshukumar09546-cpu/CropDetect-AI.git
 cd CropDetect-AI
 ```
 
